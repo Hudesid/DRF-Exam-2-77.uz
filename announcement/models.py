@@ -1,5 +1,6 @@
 import uuid
 from django.contrib.auth.hashers import make_password, check_password
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.text import slugify
 from .managers import CustomUserManager, CategoryManager
@@ -41,7 +42,10 @@ class User(AbstractBaseUser):
     product = models.CharField(max_length=250)
     address = models.CharField(max_length=255)
     profile_photo = models.ImageField(upload_to="profile_image/", blank=True, null=True)
-    phone_number = models.CharField(max_length=255, validators=[])
+    phone_number = models.CharField(max_length=255, validators=[RegexValidator(
+            regex=r'^\+9989\d{8}$',
+            message="Phone number must start with '+9989' and be followed by 8 digits."
+        )])
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name="user", null=True)
 
 
