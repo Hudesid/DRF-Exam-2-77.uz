@@ -4,12 +4,13 @@ from django.core.validators import RegexValidator
 from django.db import models
 from .managers import CustomUserManager
 from django.contrib.auth.models import AbstractBaseUser
+from announcement.models import Category
 
 
 class User(AbstractBaseUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
     username = models.CharField(max_length=150)
-    password = models.CharField(max_length=8)
+    password = models.CharField(max_length=8, null=True)
     product = models.CharField(max_length=250)
     address = models.CharField(max_length=255)
     profile_photo = models.ImageField(upload_to="profile_image/", blank=True, null=True)

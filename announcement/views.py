@@ -28,10 +28,20 @@ class CategoryListAPIView(BaseCategoryAPIView, ListView):
 
     @action(detail=False, methods=['get'])
     def product_list(self, request):
-        data = models.Product
+        categories = models.Product.objects.values('category').distinct()
+
+        products = []
+
+        for category in categories:
+            product = models.Product.objects.filter(category=category['category']).order_by('-published_at').first()
+            if product:
+                products.append(product)
+
+        serializer = serializers.ProductForGetSerializer(products, many=True)
+        return Response(serializer.data)
 
 
-class ProductListAPIView(ListView):
+class ProductListAPIView(BaseStaticPageListAPIView, ListView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductForGetSerializer
     pagination_class = paginations.ProductPagination
@@ -42,23 +52,23 @@ class ProductListAPIView(ListView):
     ordering = ['category']
 
 
-class ProductRetrieveAPIView(RetrieveAPIView):
+class ProductRetrieveAPIView(BaseStaticPageListAPIView, RetrieveAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductForGetSerializer
 
-class ProductCreateAPIView(CreateAPIView):
+class ProductCreateAPIView(BaseStaticPageListAPIView, CreateAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductSerializer
     permission_classes = [IsAuthenticated]
 
 
-class ProductUpdateAPIView(UpdateAPIView):
+class ProductUpdateAPIView(BaseStaticPageListAPIView, UpdateAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductSerializer
     permission_classes = [AuthorValidateProductAPIView]
 
 
-class ProductDestroyAPIView(DestroyAPIView):
+class ProductDestroyAPIView(BaseStaticPageListAPIView, DestroyAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductForGetSerializer
     permission_classes = [AuthorValidateProductAPIView]
