@@ -1,7 +1,5 @@
 from rest_framework import serializers
 from . import models
-from accounts.serializers import UserForGetSerializer
-from common.serializers import AddressSerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -40,14 +38,24 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
 
 class ProductForGetSerializer(serializers.ModelSerializer):
-    seller = UserForGetSerializer(read_only=True)
+    seller = serializers.SerializerMethodField()
     image = serializers.ImageField(required=False, allow_null=True)
     sub_category = SubCategorySerializer(source='category', read_only=True)
-    address  = AddressSerializer(source='validate_address', read_only=True)
+    address  = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Product
         fields = ('id', 'name', 'slug', 'sub_category', 'image', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'seller', 'extra')
+
+
+    def get_seller(self, obj):
+        from accounts.serializers import UserForGetSerializer
+        return UserForGetSerializer(obj.seller).data
+
+
+    def get_address(self, obj):
+        from common.serializers import AddressSerializer
+        return AddressSerializer(obj.validate_address).data
 
 
     def to_representation(self, instance):
@@ -58,13 +66,17 @@ class ProductForGetSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    seller = UserForGetSerializer(read_only=True)
+    seller = serializers.SerializerMethodField()
     image = serializers.ImageField(required=False, allow_null=True)
     sub_category = SubCategorySerializer(source='category', read_only=True)
 
     class Meta:
         model = models.Product
         fields = ('id', 'name', 'slug', 'sub_category', 'image', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'seller', 'extra')
+
+    def get_seller(self, obj):
+        from accounts.serializers import UserForGetSerializer
+        return UserForGetSerializer(obj.seller).data
 
 
 class SearchSerializer(serializers.ModelSerializer):

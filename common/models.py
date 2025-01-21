@@ -1,14 +1,13 @@
 from django.db import models
 from django.utils.text import slugify
 from announcement.models import Product
-from accounts.models import User
 
 
 class AddressUser(models.Model):
     name = models.CharField(max_length=255)
     lat = models.FloatField()
     long = models.FloatField()
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="validate_address")
+    user = models.OneToOneField("accounts.User", on_delete=models.CASCADE, related_name="validate_address")
 
     def __str__(self):
         return self.name

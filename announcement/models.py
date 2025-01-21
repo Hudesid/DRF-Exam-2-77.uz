@@ -3,7 +3,6 @@ from django.utils import timezone
 from django.db import models
 from django.utils.text import slugify
 from .managers import CategoryManager
-from accounts.models import User
 
 
 class Category(models.Model):
@@ -47,7 +46,7 @@ class Product(models.Model):
     published_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(unique=True, blank=True)
-    seller = models.ForeignKey(User, related_name="products", on_delete=models.CASCADE)
+    seller = models.ForeignKey("accounts.User", related_name="products", on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name

@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView, DestroyAPIView, ListAPIView
-from rest_framework.permissions import IsAuthenticated, BasePermission, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -49,6 +49,15 @@ class ProductListAPIView(BaseStaticPageListAPIView, ListAPIView):
     filterset_fields = ['price', 'address', 'published_at', 'category', 'currency']
     ordering_fields = ['category']
     ordering = ['category']
+
+    def get_queryset(self):
+        category = self.kwargs['category']
+        if category:
+            products = models.Product.objects.filter(category=category)
+            if products.exists():
+                return products
+            return models.Product.objects.none()
+        return models.Product.objects.all()
 
 
 class ProductRetrieveAPIView(BaseStaticPageListAPIView, RetrieveAPIView):
@@ -110,7 +119,7 @@ class SearchAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class PopularSearch(ListAPIView):
+class PopularSearchListAPIView(ListAPIView):
     queryset = models.PopularSearchWord.objects.all()
     serializer_class = serializers.SearchSerializer
 
