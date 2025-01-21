@@ -1,5 +1,3 @@
-from asyncio import Future
-
 from rest_framework import status
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response

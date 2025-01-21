@@ -1,8 +1,7 @@
 from django.db.models import Q
-from django.views.generic import ListView
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView, DestroyAPIView
+from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView, DestroyAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated, BasePermission, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -22,7 +21,7 @@ class BaseCategoryAPIView(BaseStaticPageListAPIView):
     serializer_class = serializers.CategorySerializer
 
 
-class CategoryListAPIView(BaseCategoryAPIView, ListView):
+class CategoryListAPIView(BaseCategoryAPIView, ListAPIView):
     filter_backends = [SearchFilter]
     search_fields = ['^name', '=parent']
 
@@ -41,7 +40,7 @@ class CategoryListAPIView(BaseCategoryAPIView, ListView):
         return Response(serializer.data)
 
 
-class ProductListAPIView(BaseStaticPageListAPIView, ListView):
+class ProductListAPIView(BaseStaticPageListAPIView, ListAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductForGetSerializer
     pagination_class = paginations.ProductPagination
@@ -83,6 +82,12 @@ class SearchAPIView(APIView):
         if search_query is None:
             posts = self.queryset
         else:
+            word = models.PopularSearchWord.objects.filter(word=search_query)
+            if word:
+                word.count += 1
+                word.save()
+            else:
+                models.PopularSearchWord.objects.create(word=search_query, count=1)
             search_filter = Q(
                 name__icontains=search_query
             ) | Q(
@@ -105,3 +110,9 @@ class SearchAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class PopularSearch(ListAPIView):
+    queryset = models.PopularSearchWord.objects.all()
+    serializer_class = serializers.SearchSerializer
+
+    def get_queryset(self):
+        return models.PopularSearchWord.objects.all().order_by('-count')[:3]

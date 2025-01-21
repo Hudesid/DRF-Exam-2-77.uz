@@ -67,3 +67,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'slug', 'sub_category', 'image', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'seller', 'extra')
 
 
+class SearchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.PopularSearchWord
+        fields = ('id', 'word', 'count')
