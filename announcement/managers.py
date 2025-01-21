@@ -25,12 +25,12 @@ class CategoryManager(models.Manager):
     def get_root_categories(self):
         return self.filter(parent__isnull=True)
 
-    def children(self, guid):
+    def children(self, id):
         try:
-            parent = self.get(guid=guid)
+            parent = self.get(guid=id)
         except self.model.DoesNotExist:
             raise ValidationError(
-                {"product": f"Object with guid={guid} does not exist."},
+                {"product": f"Object with guid={id} does not exist."},
                 code="DOES_NOT_EXIST",
             )
         return parent.child.all()
