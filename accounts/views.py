@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from . import serializers, models
-from common.views import BaseStaticPageListAPIView
 
 
 class AuthorValidateAPIView(BasePermission):
@@ -12,24 +11,24 @@ class AuthorValidateAPIView(BasePermission):
         return request.user == obj
 
 
-class UserCreateAPIView(BaseStaticPageListAPIView, CreateAPIView):
+class UserCreateAPIView(CreateAPIView):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserForCreateUpdateSerializer
 
 
-class UserUpdateAPIView(BaseStaticPageListAPIView, UpdateAPIView):
+class UserUpdateAPIView(UpdateAPIView):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserForCreateUpdateSerializer
     permission_classes = [AuthorValidateAPIView]
 
 
-class UserDestroyAPIView(BaseStaticPageListAPIView, DestroyAPIView):
+class UserDestroyAPIView(DestroyAPIView):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserForGetSerializer
     permission_classes = [AuthorValidateAPIView]
 
 
-class UserRetrieveAPIView(BaseStaticPageListAPIView, RetrieveAPIView):
+class UserRetrieveAPIView(RetrieveAPIView):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserForGetSerializer
     permission_classes = [IsAuthenticated]

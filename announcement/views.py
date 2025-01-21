@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from . import serializers, models, paginations
-from common.views import BaseStaticPageListAPIView
 
 
 class AuthorValidateProductAPIView(BasePermission):
@@ -16,7 +15,7 @@ class AuthorValidateProductAPIView(BasePermission):
         return request.user == obj.seller
 
 
-class BaseCategoryAPIView(BaseStaticPageListAPIView):
+class BaseCategoryAPIView(APIView):
     queryset = models.Category.objects.all()
     serializer_class = serializers.CategorySerializer
 
@@ -40,7 +39,7 @@ class CategoryListAPIView(BaseCategoryAPIView, ListAPIView):
         return Response(serializer.data)
 
 
-class ProductListAPIView(BaseStaticPageListAPIView, ListAPIView):
+class ProductListAPIView(ListAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductForGetSerializer
     pagination_class = paginations.ProductPagination
@@ -60,23 +59,23 @@ class ProductListAPIView(BaseStaticPageListAPIView, ListAPIView):
         return models.Product.objects.all()
 
 
-class ProductRetrieveAPIView(BaseStaticPageListAPIView, RetrieveAPIView):
+class ProductRetrieveAPIView(RetrieveAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductForGetSerializer
 
-class ProductCreateAPIView(BaseStaticPageListAPIView, CreateAPIView):
+class ProductCreateAPIView(CreateAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductSerializer
     permission_classes = [IsAuthenticated]
 
 
-class ProductUpdateAPIView(BaseStaticPageListAPIView, UpdateAPIView):
+class ProductUpdateAPIView(UpdateAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductSerializer
     permission_classes = [AuthorValidateProductAPIView]
 
 
-class ProductDestroyAPIView(BaseStaticPageListAPIView, DestroyAPIView):
+class ProductDestroyAPIView(DestroyAPIView):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductForGetSerializer
     permission_classes = [AuthorValidateProductAPIView]

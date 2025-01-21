@@ -9,7 +9,7 @@ from django.contrib.auth.models import AbstractBaseUser
 class User(AbstractBaseUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
     username = models.CharField(max_length=150, unique=True)
-    password = models.CharField(max_length=8, null=True)
+    password = models.CharField(max_length=128, null=True)
     product = models.CharField(max_length=250)
     address = models.CharField(max_length=255)
     profile_photo = models.ImageField(upload_to="profile_image/", blank=True, null=True)
@@ -35,4 +35,8 @@ class User(AbstractBaseUser):
 
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)
+
+    def save(self, *args, **kwargs):
+        print(self.is_staff, self.is_superuser)
+        super().save(*args, **kwargs)
 
