@@ -25,3 +25,6 @@ class RegionAdmin(admin.ModelAdmin):
 @admin.register(models.StaticPage)
 class PrivacyPolicyAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'created_at', 'updated_at')
+    prepopulated_fields = {
+        'slug': ('title',)
+    }

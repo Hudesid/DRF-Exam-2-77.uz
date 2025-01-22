@@ -1,3 +1,5 @@
+from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
@@ -31,7 +33,8 @@ class UserDestroyAPIView(DestroyAPIView):
 class UserRetrieveAPIView(RetrieveAPIView):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserForGetSerializer
-    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
+    # permission_classes = [IsAuthenticated]
 
 
 class LogoutAPIView(APIView):

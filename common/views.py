@@ -3,7 +3,7 @@ from . import serializers, models
 
 
 class RegionListAPIView(ListAPIView):
-    queryset = models.Region
+    queryset = models.Region.objects.all()
     serializer_class = serializers.RegionListSerializer
 
 

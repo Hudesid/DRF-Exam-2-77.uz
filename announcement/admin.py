@@ -8,6 +8,12 @@ class ImageInLine(admin.TabularInline):
     raw_id_fields = ('product',)
 
 
+class CategoryInLine(admin.TabularInline):
+    model = models.Category
+    extra = 1
+    raw_id_fields = ('parent',)
+
+
 @admin.register(models.Image)
 class ImageAdmin(admin.ModelAdmin):
     list_display = ('id', 'image', 'created_at', 'product')

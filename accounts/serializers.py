@@ -1,41 +1,35 @@
 from rest_framework import serializers
 from . import models
+from announcement.serializers import CategorySerializer
+from announcement.models import Category
+from common.serializers import UserAddressSerializer
+
 
 
 class UserForGetSerializer(serializers.ModelSerializer):
-    category = serializers.SerializerMethodField()
-    address = serializers.SerializerMethodField()
 
     class Meta:
         model = models.User
         fields = ('id', 'username', 'password', 'product', 'phone_number', 'category', 'address', 'profile_photo')
 
-    def get_category(self, obj):
-        from announcement.serializers import CategorySerializer
-        return CategorySerializer(obj.category).data
 
-    def get_address(self, obj):
-        from common.serializers import UserAddressSerializer
-        return UserAddressSerializer(obj.validate_address).data
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['address'] = UserAddressSerializer(instance.validate_address).data
+        representation['category'] = CategorySerializer(instance.category).data
+        return representation
 
 
 class UserForCreateUpdateSerializer(serializers.ModelSerializer):
-    category = serializers.SerializerMethodField()
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
 
     class Meta:
         model = models.User
         fields = ('id', 'username', 'product', 'phone_number', 'category', 'address', 'profile_photo')
 
 
-    def get_category(self, obj):
-        from announcement.serializers import CategorySerializer
-        return CategorySerializer(obj.category).data
-
-
     def create(self, validated_data):
-        password = validated_data.pop('password')
         user = models.User.objects.create(**validated_data)
-        user.set_password(password)
         user.is_active = False
         user.save()
         return user

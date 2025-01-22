@@ -2,20 +2,39 @@ from rest_framework import serializers
 from . import models
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    icon = serializers.ImageField(required=False, allow_null=True)
+class ChildrenCategorySerializer(serializers.ModelSerializer):
     ads_count = serializers.SerializerMethodField()
     children = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Category
-        fields = ('id', 'name', 'icon', 'children')
+        fields = ('id', 'name', 'ads_count', 'children')
 
-    def get_count(self, obj):
-        return obj.count()
+    def get_ads_count(self, obj):
+        return obj.ads_count()
 
-    def get_children(self, instance):
-        return models.Category.objects._build_tree(instance)
+    def get_children(self, obj):
+        if obj.children.exists():
+            return ChildrenCategorySerializer(obj.children, many=True).data
+        return []
+
+class CategorySerializer(serializers.ModelSerializer):
+    icon = serializers.ImageField(required=False, allow_null=True)
+    ads_count = serializers.SerializerMethodField()
+    children = ChildrenCategorySerializer(read_only=True, many=True)
+
+    class Meta:
+        model = models.Category
+        fields = ('id', 'name', 'ads_count', 'icon', 'children')
+
+    def to_representation(self, instance):
+        if instance.parent:
+            return None
+        representation = super().to_representation(instance)
+        return representation
+
+    def get_ads_count(self, obj):
+        return obj.ads_count()
 
 
 class ParentCategorySerializer(serializers.ModelSerializer):
@@ -30,12 +49,16 @@ class ParentCategorySerializer(serializers.ModelSerializer):
 
 
 class SubCategorySerializer(serializers.ModelSerializer):
-    category = ParentCategorySerializer(source="parent", read_only=True)
+    category = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Category
         fields = ["id", "name", "category"]
 
+    def get_category(self, obj):
+        if obj.parent.exists():
+            return ParentCategorySerializer(read_only=True, many=True)
+        return None
 
 class ProductForGetSerializer(serializers.ModelSerializer):
     seller = serializers.SerializerMethodField()

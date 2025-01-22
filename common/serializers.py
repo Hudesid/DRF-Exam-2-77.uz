@@ -5,7 +5,7 @@ from . import models
 class UserAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.AddressUser
-        fields = ('id', 'name', 'lat', 'long', 'user')
+        fields = ('id', 'name', 'lat', 'long')
 
 
 class RegionSerializer(serializers.ModelSerializer):
