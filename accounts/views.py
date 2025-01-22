@@ -34,7 +34,6 @@ class UserRetrieveAPIView(RetrieveAPIView):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserForGetSerializer
     lookup_field = 'id'
-    # permission_classes = [IsAuthenticated]
 
 
 class LogoutAPIView(APIView):

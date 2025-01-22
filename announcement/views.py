@@ -50,9 +50,9 @@ class ProductListAPIView(ListAPIView):
     ordering = ['category']
 
     def get_queryset(self):
-        category = self.kwargs['category']
+        category = self.kwargs.get('category')
         if category:
-            products = models.Product.objects.filter(category=category)
+            products = models.Product.objects.filter(category__name=category)
             if products.exists():
                 return products
             return models.Product.objects.none()

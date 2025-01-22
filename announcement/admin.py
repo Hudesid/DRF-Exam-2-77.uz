@@ -16,7 +16,7 @@ class CategoryInLine(admin.TabularInline):
 
 @admin.register(models.Image)
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'image', 'created_at', 'product')
+    list_display = ('id', 'image', 'product')
 
 
 @admin.register(models.Category)

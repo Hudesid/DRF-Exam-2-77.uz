@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from . import models
+from accounts.models import User
 
 
 class ChildrenCategorySerializer(serializers.ModelSerializer):
@@ -60,20 +61,37 @@ class SubCategorySerializer(serializers.ModelSerializer):
             return ParentCategorySerializer(read_only=True, many=True)
         return None
 
+
+class ExtraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Extra
+        fields = ('id', 'is_mine', 'status', 'expires_at')
+
+
 class ProductForGetSerializer(serializers.ModelSerializer):
     seller = serializers.SerializerMethodField()
-    image = serializers.ImageField(required=False, allow_null=True)
+    images = serializers.ImageField(required=False, allow_null=True)
     sub_category = SubCategorySerializer(source='category', read_only=True)
     address  = serializers.SerializerMethodField()
+    extra = ExtraSerializer(read_only=True)
+
 
     class Meta:
         model = models.Product
-        fields = ('id', 'name', 'slug', 'sub_category', 'image', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'seller', 'extra')
+        fields = ('id', 'name', 'slug', 'sub_category', 'images', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'seller', 'extra')
 
 
     def get_seller(self, obj):
         from accounts.serializers import UserForGetSerializer
         return UserForGetSerializer(obj.seller).data
+
+    def create(self, validated_data):
+        images = validated_data.pop('images', [])
+        product = models.Product.objects.create(**validated_data)
+        for image in images:
+            photo = models.Image.objects.create(image=image, product=product)
+            photo.save()
+        return product
 
 
     def get_address(self, obj):
@@ -82,24 +100,26 @@ class ProductForGetSerializer(serializers.ModelSerializer):
 
 
     def to_representation(self, instance):
-        if not instance.extra:
-            return []
+        if not instance.get_extra():
+            return None
         representation = super().to_representation(instance)
         return representation
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    seller = serializers.SerializerMethodField()
-    image = serializers.ImageField(required=False, allow_null=True)
+    seller = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+    images = serializers.ImageField(required=False, allow_null=True)
     sub_category = SubCategorySerializer(source='category', read_only=True)
+    extra = ExtraSerializer(read_only=True, required=False, allow_null=True)
 
     class Meta:
         model = models.Product
-        fields = ('id', 'name', 'slug', 'sub_category', 'image', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'seller', 'extra')
+        fields = ('id', 'name', 'slug', 'sub_category', 'images', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'seller', 'extra')
 
-    def get_seller(self, obj):
-        from accounts.serializers import UserForGetSerializer
-        return UserForGetSerializer(obj.seller).data
+
+    def create(self, validated_data):
+        product = models.Product.objects.create(seller=self.context['request'].user, **validated_data)
+        return product
 
 
 class SearchSerializer(serializers.ModelSerializer):
