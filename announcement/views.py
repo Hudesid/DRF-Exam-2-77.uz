@@ -24,19 +24,19 @@ class CategoryListAPIView(BaseCategoryAPIView, ListAPIView):
     filter_backends = [SearchFilter]
     search_fields = ['^name', '=parent']
 
-    @action(detail=False, methods=['get'])
-    def product_list(self, request):
-        categories = models.Product.objects.values('category').distinct()
-
-        products = []
-
-        for category in categories:
-            product = models.Product.objects.filter(category=category['category']).order_by('-published_at').first()
-            if product:
-                products.append(product)
-
-        serializer = serializers.ProductForGetSerializer(products, many=True)
-        return Response(serializer.data)
+    # @action(detail=False, methods=['get'])
+    # def product_list(self, request):
+    #     categories = models.Product.objects.values('category').distinct()
+    #
+    #     products = []
+    #
+    #     for category in categories:
+    #         product = models.Product.objects.filter(category=category['category']).order_by('-published_at').first()
+    #         if product:
+    #             products.append(product)
+    #
+    #     serializer = serializers.ProductForGetSerializer(products, many=True)
+    #     return Response(serializer.data)
 
 
 class ProductListAPIView(ListAPIView):

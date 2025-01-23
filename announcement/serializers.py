@@ -1,4 +1,7 @@
+from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 from . import models
 from accounts.models import User
 
@@ -85,14 +88,6 @@ class ProductForGetSerializer(serializers.ModelSerializer):
         from accounts.serializers import UserForGetSerializer
         return UserForGetSerializer(obj.seller).data
 
-    def create(self, validated_data):
-        images = validated_data.pop('images', [])
-        product = models.Product.objects.create(**validated_data)
-        for image in images:
-            photo = models.Image.objects.create(image=image, product=product)
-            photo.save()
-        return product
-
 
     def get_address(self, obj):
         from common.serializers import AddressSerializer
@@ -118,7 +113,20 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
+        images = validated_data.pop('images', None)
         product = models.Product.objects.create(seller=self.context['request'].user, **validated_data)
+
+        if images:
+            if isinstance(images, list):
+                for image in images:
+                    if not isinstance(image, (InMemoryUploadedFile, TemporaryUploadedFile)):
+                        raise ValidationError("Each image must be a valid file object.")
+                    photo = models.Image.objects.create(image=image, product=product)
+                    photo.save()
+            elif isinstance(images, (InMemoryUploadedFile, TemporaryUploadedFile)):  # Если одно изображение
+                photo = models.Image.objects.create(image=images, product=product)
+                photo.save()
+
         return product
 
 
