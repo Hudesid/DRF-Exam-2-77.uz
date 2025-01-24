@@ -149,3 +149,11 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ]
 }
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_BEAT_SCHEDULE = {
+    'update_expired_statuses': {
+        'task': 'announcement.tasks.update_expired_statuses',
+        'schedule': 300.0,
+    },
+}

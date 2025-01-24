@@ -1,7 +1,6 @@
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
 from . import models
 from accounts.models import User
 
@@ -61,7 +60,7 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
     def get_category(self, obj):
         if obj.parent.exists():
-            return ParentCategorySerializer(read_only=True, many=True)
+            return ParentCategorySerializer(read_only=True, many=True).data
         return None
 
 
@@ -95,7 +94,7 @@ class ProductForGetSerializer(serializers.ModelSerializer):
 
 
     def to_representation(self, instance):
-        if not instance.get_extra():
+        if not instance.validate_extra():
             return None
         representation = super().to_representation(instance)
         return representation
@@ -109,7 +108,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Product
-        fields = ('id', 'name', 'slug', 'sub_category', 'images', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'seller', 'extra')
+        fields = ('id', 'name', 'slug', 'sub_category', 'images', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'Mabel', 'seller', 'extra')
 
 
     def create(self, validated_data):
@@ -123,7 +122,7 @@ class ProductSerializer(serializers.ModelSerializer):
                         raise ValidationError("Each image must be a valid file object.")
                     photo = models.Image.objects.create(image=image, product=product)
                     photo.save()
-            elif isinstance(images, (InMemoryUploadedFile, TemporaryUploadedFile)):  # Если одно изображение
+            elif isinstance(images, (InMemoryUploadedFile, TemporaryUploadedFile)):
                 photo = models.Image.objects.create(image=images, product=product)
                 photo.save()
 

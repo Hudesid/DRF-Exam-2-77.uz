@@ -1,7 +1,3 @@
-import uuid
-
-from django.db.transaction import on_commit
-from django.utils import timezone
 from django.db import models
 from django.utils.text import slugify
 from .managers import CategoryManager
@@ -42,13 +38,6 @@ class Extra(models.Model):
     def __str__(self):
         return f"Status: {self.status}"
 
-    @property
-    def current_status(self):
-        if self.expires_at <= timezone.now() and self.status == 'active':
-            self.status = 'not active'
-            self.save()
-        return self.status
-
 
 class Product(models.Model):
     currency_choice = [('UZS', 'UZS'), ('RUB', 'RUB'), ('USD', 'USD')]
@@ -59,17 +48,18 @@ class Product(models.Model):
     description = models.TextField()
     author = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
+    validate_address = models.ForeignKey('common.Address', on_delete=models.SET_NULL, related_name='products', null=True)
     currency = models.CharField(max_length=3, choices=currency_choice, default=currency_choice[0])
     published_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(unique=True, blank=True)
-    extra = models.OneToOneField(Extra, on_delete=models.PROTECT, related_name='product', blank=True, null=True)
+    extra = models.OneToOneField(Extra, on_delete=models.PROTECT, related_name='product', null=True)
     seller = models.ForeignKey("accounts.User", related_name="products", on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.name
 
-    def get_extra(self):
+    def validate_extra(self):
         if self.extra.__str__() == 'Status: active':
             return True
         else:
