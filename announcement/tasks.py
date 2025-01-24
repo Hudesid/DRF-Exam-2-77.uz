@@ -1,5 +1,5 @@
+from __future__ import absolute_import, unicode_literals
 from celery import shared_task
-from celery.bin.control import status
 from django.utils import timezone
 from .models import Extra
 
