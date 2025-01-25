@@ -49,14 +49,14 @@ class ProductListAPIView(ListAPIView):
     ordering_fields = ['category']
     ordering = ['category']
 
-    def get_queryset(self):
-        category = self.kwargs.get('category')
-        if category:
-            products = models.Product.objects.filter(category__name=category)
-            if products.exists():
-                return products
-            return models.Product.objects.none()
-        return models.Product.objects.all()
+    # def get_queryset(self):
+    #     category = self.kwargs.get('category')
+    #     if category:
+    #         products = models.Product.objects.filter(category__name=category)
+    #         if products.exists():
+    #             return products
+    #         return models.Product.objects.none()
+    #     return models.Product.objects.all()
 
 
 class ProductRetrieveAPIView(RetrieveAPIView):

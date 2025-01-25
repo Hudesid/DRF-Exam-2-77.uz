@@ -39,6 +39,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return check_password(raw_password, self.password)
 
     def save(self, *args, **kwargs):
+        print(self.is_active)
         self.set_password(self.password)
         super().save(*args, **kwargs)
 
