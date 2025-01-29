@@ -1,10 +1,11 @@
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound
 from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+
 from . import serializers, models
 
 
@@ -47,3 +48,14 @@ class LogoutAPIView(APIView):
             return Response({'detail':'Successfully logged out.'})
         except KeyError:
             return Response({'detail':'Refresh token required.'})
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = serializers.CustomTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        return Response(data, status=200)
