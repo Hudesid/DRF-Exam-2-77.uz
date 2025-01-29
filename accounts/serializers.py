@@ -1,31 +1,31 @@
 from rest_framework import serializers
 from . import models
-from announcement.serializers import CategorySerializer
 from announcement.models import Category
-from common.serializers import UserAddressSerializer
+from common.serializers import AddressSerializer
 
 
 
 class UserForGetSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.User
-        fields = ('id', 'username', 'password', 'product', 'phone_number', 'category', 'address', 'profile_photo')
+        fields = ('guid', 'username', 'password', 'product', 'phone_number', 'category', 'address', 'profile_photo')
 
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['address'] = UserAddressSerializer(instance.validate_address).data
+        representation['address'] = AddressSerializer(instance.validate_address).data
+        from announcement.serializers import CategorySerializer
         representation['category'] = CategorySerializer(instance.category).data
         return representation
 
 
 class UserForCreateUpdateSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    username = serializers.CharField(required=False, allow_null=True)
 
     class Meta:
         model = models.User
-        fields = ('id', 'username', 'product', 'phone_number', 'category', 'address', 'profile_photo')
+        fields = ('guid', 'username', 'product', 'phone_number', 'category', 'address', 'profile_photo')
 
 
     def create(self, validated_data):

@@ -34,8 +34,3 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 
-@admin.register(models.Extra)
-class ExtraAdmin(admin.ModelAdmin):
-    list_display = ('id', 'is_mine', 'status', 'expires_at', 'product')
-
-

@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 from .managers import CategoryManager
+from django.utils.translation import gettext as _
+
 
 
 class Category(models.Model):
@@ -30,17 +32,19 @@ class Category(models.Model):
 #         abstract = True
 
 
-class Extra(models.Model):
-    is_mine = models.BooleanField(default=False)
-    status = models.CharField(max_length=50, default='not active')
-    expires_at = models.DateTimeField()
-
-    def __str__(self):
-        return f"Status: {self.status}"
-
-
 class Product(models.Model):
-    currency_choice = [('UZS', 'UZS'), ('RUB', 'RUB'), ('USD', 'USD')]
+    class Currency(models.TextChoices):
+        uzs = "uzs", _("UZS")
+        rub = "rub", _("RUB")
+        usd = "usd", _("USD")
+
+
+    class Status(models.TextChoices):
+        ACTIVE = 'active', 'Active'
+        INACTIVE = 'inactive', 'Inactive'
+        PENDING = 'pending', 'Pending'
+
+
     name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="products")
     phone_number = models.CharField(max_length=100)
@@ -49,21 +53,18 @@ class Product(models.Model):
     author = models.CharField(max_length=255)
     address = models.CharField(max_length=255)
     validate_address = models.ForeignKey('common.Address', on_delete=models.SET_NULL, related_name='products', null=True)
-    currency = models.CharField(max_length=3, choices=currency_choice, default=currency_choice[0])
+    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.uzs)
     published_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(unique=True, blank=True)
-    extra = models.OneToOneField(Extra, on_delete=models.PROTECT, related_name='product', null=True)
+    is_mine = models.BooleanField(default=False, null=True)
+    status = models.CharField(max_length=50, default=Status.PENDING, choices=Status.choices, null=True)
+    expires_at = models.DateTimeField(null=True)
     seller = models.ForeignKey("accounts.User", related_name="products", on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.name
 
-    def validate_extra(self):
-        if self.extra.__str__() == 'Status: active':
-            return True
-        else:
-            return False
 
     def save(self, *args, **kwargs):
         if not self.slug:

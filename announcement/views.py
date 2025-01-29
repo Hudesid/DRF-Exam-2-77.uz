@@ -15,12 +15,9 @@ class AuthorValidateProductAPIView(BasePermission):
         return request.user == obj.seller
 
 
-class BaseCategoryAPIView(APIView):
+class CategoryListAPIView(ListAPIView):
     queryset = models.Category.objects.all()
     serializer_class = serializers.CategorySerializer
-
-
-class CategoryListAPIView(BaseCategoryAPIView, ListAPIView):
     filter_backends = [SearchFilter]
     search_fields = ['^name', '=parent']
 

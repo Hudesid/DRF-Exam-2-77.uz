@@ -1,18 +1,21 @@
 import uuid
-from django.contrib.auth.hashers import make_password, check_password
 from django.core.validators import RegexValidator
 from django.db import models
 from .managers import CustomUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.utils.translation import gettext as _
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
-    username = models.CharField(max_length=150, unique=True)
+    class Role(models.TextChoices):
+        Seller = "seller", _("Seller")
+        Admin = "admin", _("Admin")
+    guid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
+    username = models.CharField(_("full username"), max_length=150, unique=True, null=True, blank=True)
     password = models.CharField(max_length=128, null=True)
     product = models.CharField(max_length=250)
     address = models.CharField(max_length=255)
-    validate_address = models.ForeignKey("common.AddressUser", on_delete=models.SET_NULL, related_name="users", null=True, blank=True)
+    validate_address = models.ForeignKey("common.Address", on_delete=models.SET_NULL, related_name="users", null=True, blank=True)
     profile_photo = models.ImageField(upload_to="profile_image/", blank=True, null=True)
     phone_number = models.CharField(max_length=13, validators=[RegexValidator(
             regex=r'^\+9989\d{8}$',
@@ -23,6 +26,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
+    role = models.CharField(max_length=20, choices=Role.choices, null=True, blank=True)
 
     objects = CustomUserManager()
 
@@ -30,18 +34,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.username
+        if self.username:
+            return self.username
+        if self.username is None:
+            return self.phone_number
 
-    def set_password(self, raw_password):
-        self.password = make_password(raw_password)
-
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.password)
 
     def save(self, *args, **kwargs):
-        print(self.is_active)
         self.set_password(self.password)
         super().save(*args, **kwargs)
-
 
 

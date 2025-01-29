@@ -3,23 +3,22 @@ from django.utils.text import slugify
 from announcement.models import Product
 
 
-class AddressUser(models.Model):
+class BaseModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
+class Region(BaseModel):
     name = models.CharField(max_length=255)
-    lat = models.FloatField()
-    long = models.FloatField()
 
     def __str__(self):
         return self.name
 
 
-class Region(models.Model):
-    name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
-
-
-class District(models.Model):
+class District(BaseModel):
     name = models.CharField(max_length=255)
     region = models.ForeignKey(Region, related_name='districts', on_delete=models.CASCADE)
 
@@ -27,7 +26,7 @@ class District(models.Model):
         return self.name
 
 
-class Address(models.Model):
+class Address(BaseModel):
     district = models.ForeignKey(District, related_name='addresses', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     lat = models.FloatField()
@@ -37,10 +36,8 @@ class Address(models.Model):
         return self.name
 
 
-class StaticPage(models.Model):
+class StaticPage(BaseModel):
     title = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(unique=True, blank=True)
     description = models.TextField()
 

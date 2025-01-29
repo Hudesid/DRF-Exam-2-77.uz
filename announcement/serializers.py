@@ -1,6 +1,8 @@
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from accounts.serializers import UserForGetSerializer
+from common.serializers import AddressSerializer
 from . import models
 from accounts.models import User
 
@@ -45,7 +47,7 @@ class ParentCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Category
-        fields = ["id", "name", "ads_count", "icon"]
+        fields = ("id", "name", "ads_count", "icon")
 
     def get_ads_count(self, obj):
         return obj.ads_count()
@@ -56,7 +58,7 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Category
-        fields = ["id", "name", "category"]
+        fields = ("id", "name", "category")
 
     def get_category(self, obj):
         if obj.parent.exists():
@@ -66,37 +68,26 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
 class ExtraSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Extra
+        model = models.Product
         fields = ('id', 'is_mine', 'status', 'expires_at')
 
 
 class ProductForGetSerializer(serializers.ModelSerializer):
-    seller = serializers.SerializerMethodField()
     images = serializers.ImageField(required=False, allow_null=True)
     sub_category = SubCategorySerializer(source='category', read_only=True)
-    address  = serializers.SerializerMethodField()
     extra = ExtraSerializer(read_only=True)
-
 
     class Meta:
         model = models.Product
         fields = ('id', 'name', 'slug', 'sub_category', 'images', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'seller', 'extra')
 
 
-    def get_seller(self, obj):
-        from accounts.serializers import UserForGetSerializer
-        return UserForGetSerializer(obj.seller).data
-
-
-    def get_address(self, obj):
-        from common.serializers import AddressSerializer
-        return AddressSerializer(obj.validate_address).data
-
-
     def to_representation(self, instance):
         if not instance.validate_extra():
             return None
         representation = super().to_representation(instance)
+        representation['address'] = AddressSerializer(instance.validate_address).data
+        representation['seller'] = UserForGetSerializer(instance.seller).data
         return representation
 
 
@@ -108,7 +99,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Product
-        fields = ('id', 'name', 'slug', 'sub_category', 'images', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'Mabel', 'seller', 'extra')
+        fields = ('id', 'name', 'slug', 'sub_category', 'author', 'images', 'price', 'currency', 'published_at', 'updated_at', 'description', 'phone_number', 'address', 'seller', 'extra')
 
 
     def create(self, validated_data):
