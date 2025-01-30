@@ -50,7 +50,7 @@ class LogoutAPIView(APIView):
             return Response({'detail':'Refresh token required.'})
 
 
-class CustomTokenObtainPairView(TokenObtainPairView):
+class CustomTokenObtainPairView(CreateAPIView):
     serializer_class = serializers.CustomTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):

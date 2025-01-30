@@ -23,10 +23,10 @@ class CustomUserAdmin(BaseUserAdmin):
     list_filter = ('role', 'is_staff', 'is_active')
     search_fields = ('username', 'phone_number')
     ordering = ('username',)
-    readonly_fields = ('last_login', 'date_joined')
+    readonly_fields = ('last_login', 'date_joined', 'guid')
     fieldsets = (
         ('Personal Info', {
-            'fields': ('username', 'phone_number', 'profile_photo', 'address', 'validate_address')
+            'fields': ('guid', 'username', 'phone_number', 'profile_photo', 'address', 'validate_address')
         }),
         ('Seller Info', {
             'fields': ('category',),

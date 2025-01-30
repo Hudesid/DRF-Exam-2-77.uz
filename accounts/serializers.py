@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model, authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from . import models
 from announcement.models import Category
 from common.serializers import AddressSerializer
@@ -41,25 +40,26 @@ class UserForCreateUpdateSerializer(serializers.ModelSerializer):
 
 User = get_user_model()
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+class CustomTokenObtainPairSerializer(serializers.Serializer):
     guid = serializers.UUIDField()
-
     password = serializers.CharField(write_only=True)
+    username = serializers.CharField()
 
     def validate(self, validated_data):
         guid = validated_data['guid']
         password = validated_data['password']
+        username = validated_data['username']
 
         try:
-            user = User.objects.get(guid=guid)
+            user = User.objects.get(guid=guid, username=username)
         except User.DoesNotExist:
-            raise serializers.ValidationError("Invalid GUID or password")
+            raise serializers.ValidationError("Invalid GUID or username or password")
 
         if not user.check_password(password):
-            raise serializers.ValidationError("Invalid GUID or password")
+            raise serializers.ValidationError("Invalid GUID or username or password")
 
         refresh = RefreshToken.for_user(user)
         return {
             'refresh_token': str(refresh),
-            'access_token': str(refresh.access_token)
+            'access_token': str(refresh.access_token),
         }

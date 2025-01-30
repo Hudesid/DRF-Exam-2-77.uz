@@ -2,6 +2,7 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from announcement.models import Category
 
+
 class UserCreatePostTestCase(APITestCase):
     def setUp(self):
         self.client = APIClient()
