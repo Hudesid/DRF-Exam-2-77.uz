@@ -38,28 +38,33 @@ class UserForCreateUpdateSerializer(serializers.ModelSerializer):
         return user
 
 
-User = get_user_model()
+# User = get_user_model()
+#
+# class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+#     password = serializers.CharField(write_only=True)
+#     username = serializers.CharField()
+#
+#     @classmethod
+#     def get_token(cls, user):
+#         token = super().get_token(user)
+#         token['username'] = user.username
+#         return token
 
-class CustomTokenObtainPairSerializer(serializers.Serializer):
-    guid = serializers.UUIDField()
-    password = serializers.CharField(write_only=True)
-    username = serializers.CharField()
 
-    def validate(self, validated_data):
-        guid = validated_data['guid']
-        password = validated_data['password']
-        username = validated_data['username']
-
-        try:
-            user = User.objects.get(guid=guid, username=username)
-        except User.DoesNotExist:
-            raise serializers.ValidationError("Invalid GUID or username or password")
-
-        if not user.check_password(password):
-            raise serializers.ValidationError("Invalid GUID or username or password")
-
-        refresh = RefreshToken.for_user(user)
-        return {
-            'refresh_token': str(refresh),
-            'access_token': str(refresh.access_token),
-        }
+    # def validate(self, validated_data):
+    #     password = validated_data['password']
+    #     username = validated_data['username']
+    #
+    #     try:
+    #         user = User.objects.get(username=username)
+    #     except User.DoesNotExist:
+    #         raise serializers.ValidationError("Invalid GUID or username or password")
+    #
+    #     if not user.check_password(password):
+    #         raise serializers.ValidationError("Invalid GUID or username or password")
+    #
+    #     token = self.get_token(user)
+    #     return {
+    #         'refresh_token': str(token),
+    #         'access_token': str(token.access_token),
+    #     }

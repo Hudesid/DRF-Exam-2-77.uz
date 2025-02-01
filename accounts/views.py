@@ -50,12 +50,20 @@ class LogoutAPIView(APIView):
             return Response({'detail':'Refresh token required.'})
 
 
-class CustomTokenObtainPairView(CreateAPIView):
-    serializer_class = serializers.CustomTokenObtainPairSerializer
+# class CustomTokenObtainPairView(CreateAPIView):
+#     serializer_class = serializers.CustomTokenObtainPairSerializer
+#
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         data = serializer.validated_data
+#
+#         return Response(data, status=200)
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-
-        return Response(data, status=200)
+#
+# class CustomRefreshToken(RefreshToken):
+#     @classmethod
+#     def for_user(cls, user):
+#         token = cls()
+#         token['user_id'] = str(user.guid)
+#         return token
