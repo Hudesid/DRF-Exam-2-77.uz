@@ -44,7 +44,9 @@ INSTALLED_APPS = [
     'django_filters',
     'announcement',
     'accounts',
-    'common'
+    'common',
+    'drf_yasg',
+    'django_celery_results'
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -143,6 +145,8 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     # "TOKEN_OBTAIN_SERIALIZER": "accounts.serializers.CustomTokenObtainPairSerializer",
+    'USER_ID_FIELD': 'guid',
+    'USER_ID_CLAIM': 'user_guid',
 }
 
 REST_FRAMEWORK = {
@@ -160,9 +164,14 @@ REDIS_PORT = 6379
 REDIS_DB = 0
 
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'django-db'
 CELERY_BEAT_SCHEDULE = {
     'update_expired_statuses': {
         'task': 'announcement.tasks.update_expired_statuses',
         'schedule': 300.0,
     },
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://127.0.0.1',
+]

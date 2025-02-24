@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.text import slugify
 from .managers import CategoryManager
 from django.utils.translation import gettext as _
-
+from .tasks import update_expired_statuses
 
 
 class Category(models.Model):
@@ -67,6 +67,7 @@ class Product(models.Model):
 
 
     def save(self, *args, **kwargs):
+        update_expired_statuses.delay()
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)

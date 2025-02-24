@@ -95,11 +95,10 @@ class ProductSerializer(serializers.ModelSerializer):
     seller = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     images = serializers.ImageField(required=False, allow_null=True)
     sub_category = SubCategorySerializer(source='category', read_only=True)
-    extra = ExtraSerializer(read_only=True, required=False, allow_null=True)
 
     class Meta:
         model = models.Product
-        fields = ('id', 'name', 'sub_category', 'author', 'images', 'price', 'currency', 'description', 'phone_number', 'address')
+        fields = ('id', 'name', 'sub_category', 'author', 'images', 'price', 'currency', 'description', 'phone_number', 'address', 'seller')
 
 
     def create(self, validated_data):

@@ -68,3 +68,21 @@ class UserForCreateUpdateSerializer(serializers.ModelSerializer):
     #         'refresh_token': str(token),
     #         'access_token': str(token.access_token),
     #     }
+
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    password = serializers.CharField(max_length=128, write_only=True)
+
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+
+        if username and password:
+            user = authenticate(username=username, password=password)
+            if user:
+                if user.is_active:
+                    return user
+                raise serializers.ValidationError("User is not activated.")
+            raise serializers.ValidationError("Incorrect password or username.")
+        raise serializers.ValidationError("Invalid username and password.")

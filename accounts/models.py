@@ -4,7 +4,6 @@ from django.db import models
 from .managers import CustomUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils.translation import gettext as _
-from django.utils import timezone
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -39,6 +38,8 @@ class User(AbstractBaseUser, PermissionsMixin):
             return self.username
         if self.username is None:
             return self.phone_number
+
+
 
 
 
